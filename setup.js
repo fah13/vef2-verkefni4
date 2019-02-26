@@ -8,18 +8,18 @@ const schema = `
 CREATE TABLE items (
   id serial primary key,
   title varchar(128) not null,
-  due timestamp with time zone,
   position int default 0,
-  completed boolean default false,
+  due timestamp with time zone,
   created timestamp with time zone not null default current_timestamp,
-  updated timestamp with time zone not null default current_timestamp
+  updated timestamp with time zone not null default current_timestamp,
+  completed boolean default false
 );
 
-INSERT INTO items (title, position, completed, due) VALUES ('Skrá í vefforritun 2', 1, true, null);
-INSERT INTO items (title, position, completed, due) VALUES ('Sækja verkefni 4 á github', 2, false, null);
-INSERT INTO items (title, position, completed, due) VALUES ('Klára verkefni 4', 3, false, null);
-INSERT INTO items (title, position, completed, due) VALUES ('Setja verkefni 4 upp á Heroku', 4, false, null);
-INSERT INTO items (title, position, completed, due) VALUES ('Skila verkefni 4', 5, false, '2019-03-08 23:59:59' );
+INSERT INTO items (title, position, due, completed) VALUES ('Skrá í vefforritun 2', 1, null, true);
+INSERT INTO items (title, position, due, completed) VALUES ('Sækja verkefni 4 á github', 2, null, false);
+INSERT INTO items (title, position, due, completed) VALUES ('Klára verkefni 4', 3, null, false);
+INSERT INTO items (title, position, due, completed) VALUES ('Setja verkefni 4 upp á Heroku', 4, null, false);
+INSERT INTO items (title, position, due, completed) VALUES ('Skila verkefni 4', 5, '2019-03-08 23:59:59', false);
 `;
 
 async function main() {
