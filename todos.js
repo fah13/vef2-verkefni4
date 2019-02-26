@@ -1,4 +1,5 @@
 const xss = require('xss');
+const validator = require('validator');
 const { query } = require('./db');
 
 /* todo útfæra virkni */
@@ -12,6 +13,14 @@ async function list() {
 async function getId(id) {
   const result = await query('SELECT * FROM items WHERE id = $1', [id]);
 
+  if (result.rows.length === 0) {
+    return {
+      success: false,
+      notFound: true,
+      validation: [],
+    };
+  }
+
   return result.rows;
 }
 
@@ -20,23 +29,41 @@ function isEmpty(s) {
   return s == null && !s;
 }
 
-function validate(title, text) {
+function validate(title, due, position, completed) {
   const errors = [];
 
   if (!isEmpty(title)) {
-    if (typeof title !== 'string' || title.length === 0) {
+    if (typeof title !== 'string' || title.length === 0 || title.length > 128) {
       errors.push({
         field: 'title',
-        error: 'Title must be a non-empty string',
+        error: 'Titill verður að vera strengur sem er 1 til 128 stafir.',
       });
     }
   }
 
-  if (!isEmpty(text)) {
-    if (typeof text !== 'string' || text.length === 0) {
+  if (!isEmpty(due)) {
+    if (typeof due === 'string' || !validator.isISO8601(due)) {
       errors.push({
-        field: 'text',
-        error: 'Text must be a non-empty string',
+        field: 'due',
+        error: 'Dagsetning verður að vera gild ISO 8601 dagsetning.',
+      });
+    }
+  }
+
+  if (!isEmpty(position)) {
+    if (typeof position !== 'number' || position < 0) {
+      errors.push({
+        field: 'position',
+        error: 'Staðsetning verður að vera heiltala, stærri eða jöfn 0.',
+      });
+    }
+  }
+
+  if (!isEmpty(completed)) {
+    if (typeof completed !== 'boolean') {
+      errors.push({
+        field: 'completed',
+        error: 'Lokið verður að vera boolean gildi.',
       });
     }
   }
@@ -55,7 +82,7 @@ async function update(id, item) {
     };
   }
 
-  const validationResult = validate(item.title, item.text);
+  const validationResult = validate(item.title, item.due, item.position, item.completed);
 
   if (validationResult.length > 0) {
     return {

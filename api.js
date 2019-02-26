@@ -25,6 +25,10 @@ async function getById(req, res) {
   const { id } = req.params;
   const result = await getId(id);
 
+  if (!result.success && result.notFound) {
+    return res.status(404).json({ error: 'Item not found' });
+  }
+
   return res.json(result);
 }
 
@@ -41,7 +45,6 @@ async function patchRoute(req, res) {
   if (!result.success && result.validation.length > 0) {
     return res.status(400).json(result.validation);
   }
-
 
   return res.status(200).json(result.item);
 }
