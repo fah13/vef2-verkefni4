@@ -32,6 +32,10 @@ async function getById(req, res) {
   return res.status(200).json(result);
 }
 
+async function postRoute(req, res) {
+  
+}
+
 async function patchRoute(req, res) {
   const { id } = req.params;
   const { title, text } = req.body;
