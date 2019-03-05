@@ -4,6 +4,7 @@ const {
   getId,
   update,
   insert,
+  deleteId,
 } = require('./todos');
 
 /* todo importa frá todos.js */
@@ -22,7 +23,7 @@ async function listRoute(req, res) {
   return res.json(items);
 }
 
-async function selectId(req, res) {
+async function selectRoute(req, res) {
   const { id } = req.params;
   const result = await getId(id);
 
@@ -66,12 +67,25 @@ async function patchRoute(req, res) {
   return res.status(200).json(result.item);
 }
 
+async function deleteRoute(req, res) {
+  const { id } = req.params;
+
+  const result = await deleteId(id);
+
+  if (!result.success && result.notFound) {
+    return res.status(404).json({ error: 'Item not found' });
+  }
+
+  return res.status(204).end();
+}
+
 /* todo útfæra vefþjónustuskil */
 
 router.get('/', catchErrors(listRoute));
-router.get('/:id', catchErrors(selectId));
+router.get('/:id', catchErrors(selectRoute));
 router.post('/', catchErrors(postRoute));
 router.patch('/:id', catchErrors(patchRoute));
+router.delete('/:id', catchErrors(deleteRoute));
 
 
 module.exports = router;

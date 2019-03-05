@@ -1,6 +1,9 @@
 const xss = require('xss');
 const validator = require('validator');
-const { query } = require('./db');
+const {
+  query,
+  deleteRow,
+} = require('./db');
 
 /* todo útfæra virkni */
 
@@ -115,7 +118,7 @@ async function insert({ title, due, position } = {}) {
 }
 
 async function update(id, item) {
-  const result = await query('SELECT * FROM items where id = $1', [id]);
+  const result = await deleteRow(id);
 
   if (result.rows.length === 0) {
     return {
@@ -162,6 +165,33 @@ async function update(id, item) {
   };
 }
 
+async function deleteId(id) {
+  const result = await query('DELETE FROM items WHERE id = $1', [id]);
+
+  console.info(result.rows.length);
+
+  /*   const item = data.find(i => i.id === parseInt(id, 10));
+
+  if (item) {
+    data.splice(data.indexOf(item), 1);
+    return res.status(204).end();
+  } */
+
+  if (result.rows.length === 0) {
+    return {
+      success: true,
+      notFound: false,
+      validation: [],
+    };
+  }
+
+  return {
+    success: false,
+    notFound: true,
+    validation: [],
+  };
+}
+
 /*
 function getTodos(completed, orderby = 'asc') {
   const orderString = orderby.toLowerCase() === 'desc' ? 'DESC' : 'ASC';
@@ -179,4 +209,5 @@ module.exports = {
   update,
   validate,
   insert,
+  deleteId,
 };
