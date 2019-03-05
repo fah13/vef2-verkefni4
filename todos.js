@@ -71,7 +71,6 @@ async function getId(id) {
 }
 
 async function insert({ title, due, position } = {}) {
-
   // validate'a gögnin sem við vorum að fá
   const validationResult = validate(title, due, position);
 
@@ -81,10 +80,7 @@ async function insert({ title, due, position } = {}) {
       notFound: false,
       validation: validationResult,
     };
-  } 
-
-  console.log(validationResult);
-  console.log(validationResult.length);
+  }
 
   const columns = [
     'title',
@@ -99,7 +95,6 @@ async function insert({ title, due, position } = {}) {
   ].filter(Boolean);
 
   const updates = [...changedValues];
-  console.log(updates);
 
   const updatedColumnsQuery = columns.map((column, i) => `$${i + 1}`);
 
@@ -109,8 +104,6 @@ async function insert({ title, due, position } = {}) {
     VALUES
     (${updatedColumnsQuery})
     RETURNING *`;
-
-  console.log(q);
 
   const updateResult = await query(q, updates);
 
@@ -169,12 +162,12 @@ async function update(id, item) {
   };
 }
 
-/* 
+/*
 function getTodos(completed, orderby = 'asc') {
   const orderString = orderby.toLowerCase() === 'desc' ? 'DESC' : 'ASC';
 
   if (completed === false || completed === 'true')
- 
+
   `SELECT id, title, ...., WHERE complted = .... ORDER BY ....`
   `SELECT id, title, ...., ORDER BY ....`
 }
