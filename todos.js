@@ -4,27 +4,6 @@ const { query } = require('./db');
 
 /* todo útfæra virkni */
 
-async function list() {
-  const result = await query('SELECT * FROM items');
-
-  return result.rows;
-}
-
-async function getId(id) {
-  const result = await query('SELECT * FROM items WHERE id = $1', [id]);
-
-  if (result.rows.length === 0) {
-    return {
-      success: false,
-      notFound: true,
-      validation: [],
-    };
-  }
-
-  return result.rows;
-}
-
-
 function isEmpty(s) {
   return s == null && !s;
 }
@@ -69,6 +48,77 @@ function validate(title, due, position, completed) {
   }
 
   return errors;
+}
+
+async function list() {
+  const result = await query('SELECT * FROM items');
+
+  return result.rows;
+}
+
+async function getId(id) {
+  const result = await query('SELECT * FROM items WHERE id = $1', [id]);
+
+  if (result.rows.length === 0) {
+    return {
+      success: false,
+      notFound: true,
+      validation: [],
+    };
+  }
+
+  return result.rows;
+}
+
+async function insert({ title, due, position } = {}) {
+
+  // validate'a gögnin sem við vorum að fá
+  const validationResult = validate(title, due, position);
+
+  if (validationResult.length > 0) {
+    return {
+      success: false,
+      notFound: false,
+      validation: validationResult,
+    };
+  } 
+
+  console.log(validationResult);
+  console.log(validationResult.length);
+
+  const columns = [
+    'title',
+    !isEmpty(due) ? 'due' : null,
+    !isEmpty(position) ? 'position' : null,
+  ].filter(Boolean);
+
+  const changedValues = [
+    xss(title),
+    !isEmpty(due) ? xss(due) : null,
+    !isEmpty(position) ? xss(position) : null,
+  ].filter(Boolean);
+
+  const updates = [...changedValues];
+  console.log(updates);
+
+  const updatedColumnsQuery = columns.map((column, i) => `$${i + 1}`);
+
+  const q = `
+    INSERT INTO items
+    (${columns.join(',')})
+    VALUES
+    (${updatedColumnsQuery})
+    RETURNING *`;
+
+  console.log(q);
+
+  const updateResult = await query(q, updates);
+
+  return {
+    success: true,
+    validation: [],
+    item: updateResult.rows[0],
+  };
 }
 
 async function update(id, item) {
@@ -134,4 +184,6 @@ module.exports = {
   list,
   getId,
   update,
+  validate,
+  insert,
 };
