@@ -2,7 +2,6 @@ const xss = require('xss');
 const validator = require('validator');
 const {
   query,
-  deleteRow,
 } = require('./db');
 
 /* todo útfæra virkni */
@@ -154,8 +153,6 @@ async function update(id, { title, due, position, completed } = {}) {
 
   const updates = [id, ...changedValues];
 
-  console.log(updates);
-
   const updatedColumnsQuery = columns.map((column, i) => `${column} = $${i + 2}`);
 
   const q = `
@@ -163,8 +160,6 @@ async function update(id, { title, due, position, completed } = {}) {
     SET ${updatedColumnsQuery.join(', ')}
     WHERE id = $1
     RETURNING *`;
-
-  console.log(q);  
 
   const updateResult = await query(q, updates);
 
