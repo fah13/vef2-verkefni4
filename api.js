@@ -48,9 +48,9 @@ async function selectRoute(req, res) {
 }
 
 async function postRoute(req, res) {
-  const { title, due, position } = req.body;
+  const { title, due, position, completed } = req.body;
 
-  const result = await insert({ title, due, position });
+  const result = await insert({ title, due, position, completed });
 
   if (!result.success && result.notFound) {
     return res.status(404).json({ error: 'Item not found' });

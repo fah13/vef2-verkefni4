@@ -23,7 +23,7 @@ function validate(title, due, position, completed) {
   }
 
   if (!isEmpty(due)) {
-    if (typeof due === 'string' || !validator.isISO8601(due)) {
+    if (typeof due !== 'string' || !validator.isISO8601(due)) {
       errors.push({
         field: 'due',
         error: 'Dagsetning verður að vera gild ISO 8601 dagsetning.',
@@ -78,9 +78,9 @@ async function getId(id) {
   return result.rows;
 }
 
-async function insert({ title, due, position } = {}) {
+async function insert({ title, due, position, completed } = {}) {
   // validate'a gögnin sem við vorum að fá
-  const validationResult = validate(title, due, position);
+  const validationResult = validate(title, due, position, completed);
 
   if (validationResult.length > 0) {
     return {
@@ -94,12 +94,14 @@ async function insert({ title, due, position } = {}) {
     'title',
     !isEmpty(due) ? 'due' : null,
     !isEmpty(position) ? 'position' : null,
+    // !isEmpty(completed) ? 'completed' : null,
   ].filter(Boolean);
 
   const changedValues = [
     xss(title),
     !isEmpty(due) ? xss(due) : null,
     !isEmpty(position) ? xss(position) : null,
+    // !isEmpty(completed) ? xss(completed) : null,
   ].filter(Boolean);
 
   const updates = [...changedValues];
