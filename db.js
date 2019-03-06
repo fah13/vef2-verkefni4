@@ -29,13 +29,6 @@ async function query(sqlQuery, values = []) {
   return result;
 }
 
-async function deleteRow(id) {
-  const q = 'DELETE FROM applications WHERE id = $1';
-
-  return query(q, id);
-}
-
 module.exports = {
   query,
-  deleteRow,
 };
