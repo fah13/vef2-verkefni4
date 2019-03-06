@@ -166,30 +166,26 @@ async function update(id, item) {
 }
 
 async function deleteId(id) {
-  const result = await query('DELETE FROM items WHERE id = $1', [id]);
+  const checkId = await query('SELECT * FROM items WHERE id = $1', [id]);
 
-  console.info(result.rows.length);
-
-  /*   const item = data.find(i => i.id === parseInt(id, 10));
-
-  if (item) {
-    data.splice(data.indexOf(item), 1);
-    return res.status(204).end();
-  } */
-
-  if (result.rows.length === 0) {
+  if (checkId.rows.length === 0) {
     return {
-      success: true,
-      notFound: false,
+      success: false,
+      notFound: true,
       validation: [],
     };
   }
 
+  const result = await query('DELETE FROM items WHERE id = $1', [id]);
+
+  console.info(result.rows.length);
+
   return {
-    success: false,
-    notFound: true,
+    success: true,
+    notFound: false,
     validation: [],
   };
+
 }
 
 /*
