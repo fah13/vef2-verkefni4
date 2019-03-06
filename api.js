@@ -1,6 +1,7 @@
 const express = require('express');
 const {
   list,
+  showCompleted,
   getId,
   update,
   insert,
@@ -16,9 +17,21 @@ function catchErrors(fn) {
 }
 
 async function listRoute(req, res) {
-  // const {orderby, completed } = req.query;
+  const { order, completed } = req.query;
 
-  const items = await list();
+  let items;
+
+  const desc = order === 'DESC';
+  const orderBy = desc ? 'position DESC' : 'position ASC';
+
+  items = await list(orderBy);
+
+  if (completed !== undefined) {
+    const sortCompleted = completed === 'true';
+    const request = sortCompleted ? 'true' : 'false';
+
+    items = await showCompleted(request);
+  }
 
   return res.json(items);
 }
@@ -54,9 +67,9 @@ async function patchRoute(req, res) {
   const { id } = req.params;
   const { title, due, position, completed } = req.body;
 
-  if (req.body.length === undefined) {
+  /* if (req.body.length === undefined) {
     return res.status(400).json({ error: 'No content' });
-  }
+  } */
 
   const result = await update(id, { title, due, position, completed });
 

@@ -52,8 +52,14 @@ function validate(title, due, position, completed) {
   return errors;
 }
 
-async function list() {
-  const result = await query('SELECT * FROM items');
+async function list(order) {
+  const result = await query(`SELECT * FROM items ORDER BY ${order}`);
+
+  return result.rows;
+}
+
+async function showCompleted(request) {
+  const result = await query('SELECT * FROM items WHERE completed = $1', [request]);
 
   return result.rows;
 }
@@ -186,7 +192,9 @@ async function deleteId(id) {
   // annars eyða id
   const result = await query('DELETE FROM items WHERE id = $1', [id]);
 
-  if (result.rows.length === 0) {
+  if (result.rowCount === 1) {
+    console.info('Færslu eytt');
+
     return {
       success: true,
       notFound: false,
@@ -194,7 +202,7 @@ async function deleteId(id) {
     };
   }
 
-  return result;
+  return result.rowCount === 1;
 }
 
 /*
@@ -210,6 +218,7 @@ function getTodos(completed, orderby = 'asc') {
 
 module.exports = {
   list,
+  showCompleted,
   getId,
   update,
   validate,
