@@ -117,8 +117,8 @@ async function insert({ title, due, position } = {}) {
   };
 }
 
-async function update(id, item) {
-  const result = await deleteRow(id);
+async function update(id, { title, due, position, completed } = {}) {
+  const result = await query('SELECT * FROM items where id = $1', [id]);
 
   if (result.rows.length === 0) {
     return {
@@ -128,7 +128,7 @@ async function update(id, item) {
     };
   }
 
-  const validationResult = validate(item.title, item.due, item.position, item.completed);
+  const validationResult = validate(title, due, position, completed);
 
   if (validationResult.length > 0) {
     return {
@@ -137,37 +137,49 @@ async function update(id, item) {
       validation: validationResult,
     };
   }
-  const changedColumns = [
-    !isEmpty(item.title) ? 'title' : null,
-    !isEmpty(item.text) ? 'text' : null,
+
+  const columns = [
+    !isEmpty(title) ? 'title' : null,
+    !isEmpty(due) ? 'due' : null,
+    !isEmpty(position) ? 'position' : null,
+    !isEmpty(completed) ? 'completed' : null,
   ].filter(Boolean);
 
   const changedValues = [
-    !isEmpty(item.title) ? xss(item.title) : null,
-    !isEmpty(item.text) ? xss(item.text) : null,
+    !isEmpty(title) ? xss(title) : null,
+    !isEmpty(due) ? xss(due) : null,
+    !isEmpty(position) ? xss(position) : null,
+    !isEmpty(completed) ? xss(completed) : null,
   ].filter(Boolean);
 
   const updates = [id, ...changedValues];
 
-  const updatedColumnsQuery = changedColumns.map((column, i) => `${column} = $${i + 2}`);
+  console.log(updates);
+
+  const updatedColumnsQuery = columns.map((column, i) => `${column} = $${i + 2}`);
 
   const q = `
     UPDATE items
     SET ${updatedColumnsQuery.join(', ')}
     WHERE id = $1
-    RETURNING id, title, text`;
+    RETURNING *`;
+
+  console.log(q);  
 
   const updateResult = await query(q, updates);
 
   return {
     success: true,
+    notFound: false,
     item: updateResult.rows[0],
   };
 }
 
 async function deleteId(id) {
+  // athuga fyrst hvort id sé til
   const checkId = await query('SELECT * FROM items WHERE id = $1', [id]);
 
+  // ef id ekki til þá skila að það finnst ekki
   if (checkId.rows.length === 0) {
     return {
       success: false,
@@ -176,16 +188,18 @@ async function deleteId(id) {
     };
   }
 
+  // annars eyða id
   const result = await query('DELETE FROM items WHERE id = $1', [id]);
 
-  console.info(result.rows.length);
+  if (result.rows.length === 0) {
+    return {
+      success: true,
+      notFound: false,
+      validation: [],
+    };
+  }
 
-  return {
-    success: true,
-    notFound: false,
-    validation: [],
-  };
-
+  return result;
 }
 
 /*

@@ -52,9 +52,9 @@ async function postRoute(req, res) {
 
 async function patchRoute(req, res) {
   const { id } = req.params;
-  const { title, text } = req.body;
+  const { title, due, position, completed } = req.body;
 
-  const result = await update(id, { title, text });
+  const result = await update(id, { title, due, position, completed });
 
   if (!result.success && result.notFound) {
     return res.status(404).json({ error: 'Item not found' });
