@@ -58,8 +58,8 @@ async function list(order) {
   return result.rows;
 }
 
-async function showCompleted(request) {
-  const result = await query('SELECT * FROM items WHERE completed = $1', [request]);
+async function showCompleted(request, order) {
+  const result = await query(`SELECT * FROM items WHERE completed = $1 ORDER BY ${order}`, [request]);
 
   return result.rows;
 }
@@ -79,6 +79,20 @@ async function getId(id) {
 }
 
 async function insert({ title, due, position, completed } = {}) {
+  // skila error ef það er enginn title
+  if (isEmpty(title)) {
+    const errors = [];
+    errors.push({
+      field: 'title',
+      error: 'Titill verður að vera strengur sem er 1 til 128 stafir.',
+    });
+    return {
+      success: false,
+      notFound: false,
+      validation: errors,
+    };
+  }
+
   // validate'a gögnin sem við vorum að fá
   const validationResult = validate(title, due, position, completed);
 

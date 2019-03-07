@@ -16,12 +16,23 @@ function catchErrors(fn) {
   return (req, res, next) => fn(req, res, next).catch(next);
 }
 
+/*
+function getTodos(completed, orderby = 'asc') {
+  const orderString = orderby.toLowerCase() === 'desc' ? 'DESC' : 'ASC';
+
+  if (completed === false || completed === 'true')
+
+  `SELECT id, title, ...., WHERE complted = .... ORDER BY ....`
+  `SELECT id, title, ...., ORDER BY ....`
+}
+ */
+
 async function listRoute(req, res) {
-  const { order, completed } = req.query;
+  const { order = 'asc', completed } = req.query;
 
   let items;
 
-  const desc = order === 'DESC';
+  const desc = order.toLowerCase() === 'desc';
   const orderBy = desc ? 'position DESC' : 'position ASC';
 
   items = await list(orderBy);
@@ -30,7 +41,7 @@ async function listRoute(req, res) {
     const sortCompleted = completed === 'true';
     const request = sortCompleted ? 'true' : 'false';
 
-    items = await showCompleted(request);
+    items = await showCompleted(request, orderBy);
   }
 
   return res.json(items);
