@@ -159,7 +159,14 @@ async function update(id, { title, due, position, completed } = {}) {
     !isEmpty(completed) ? xss(completed) : null,
   ].filter(Boolean);
 
-  const updates = [id, ...changedValues];
+  let updates;
+
+  // skítaredding því xss(completed) skilar tómum streng ef completed er false
+  if (completed === false) {
+    updates = [id, ...changedValues, false];
+  } else {
+    updates = [id, ...changedValues];
+  }
 
   const updatedColumnsQuery = columns.map((column, i) => `${column} = $${i + 2}`);
 

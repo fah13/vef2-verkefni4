@@ -67,10 +67,6 @@ async function patchRoute(req, res) {
   const { id } = req.params;
   const { title, due, position, completed } = req.body;
 
-  /* if (req.body.length === undefined) {
-    return res.status(400).json({ error: 'No content' });
-  } */
-
   const result = await update(id, { title, due, position, completed });
 
   if (!result.success && result.notFound) {
